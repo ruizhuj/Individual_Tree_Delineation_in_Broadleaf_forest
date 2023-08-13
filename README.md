@@ -20,7 +20,6 @@ The ITD method offers an advanced approach to segmenting tree crowns in broadlea
 ### Workflow:
 
 Our ITD workflow encapsulates the entire process from raw ALS data to final tree crown delineation, including the following steps
----
 1. Create a 50cm resolution CHM.
 2. Create  an HCBM from the HCB-HT relationship using field data (Figure 1).
 3. Identify canopy gaps.
@@ -30,7 +29,6 @@ Our ITD workflow encapsulates the entire process from raw ALS data to final tree
 7. Pinpoint treetops and crown edges via targeted CHM×DHP raster layers.
 8. Perform marker-control watershed delineation on a top-edge-enhanced CHM×DHP layer, calculated as:
 (CHM×DHP) × (1.2 × treetops) + (CHM×DHP) × (1 - gaps) × (1 - edges) × (1 - treetops)
----
    
 ![Workflow Diagram](imgs/workflow2.jpg)
 
