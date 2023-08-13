@@ -6,7 +6,7 @@ This repository provides the code and documentation for the ITD method, crafted 
 
 The ITD method offers an advanced approach to segmenting tree crowns in broadleaf forests.
 
-### Key highlights:
+### Highlights:
 
 1. **Reclassification of Vegetation Point Clouds**: Our method effectively segregates vegetation point clouds into under-/mid-storey and overstorey.
    ![Under-/Mid-storey and Overstorey Reclassification](imgs/las_reclassification.png)
