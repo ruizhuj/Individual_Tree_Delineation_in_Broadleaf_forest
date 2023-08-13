@@ -9,10 +9,10 @@ The ITD method offers an advanced approach to segmenting tree crowns in broadlea
 ### Key highlights:
 
 1. **Reclassification of Vegetation Point Clouds**: Our method effectively segregates vegetation point clouds into under-/mid-storey and overstorey.
-   - ![Under-/Mid-storey and Overstorey Reclassification](imgs/las_reclassification.png) (*Image 1 vs Image 2*)
+   - ![Under-/Mid-storey and Overstorey Reclassification](imgs/las_reclassification.png)
    
 2. **ITD Crown validation**: A comprehensive mapping of Tree crowns delineated using our method.
-   - ![ITD Crown validation](imgs/Plot1_ITD_field_validation.jpg)
+   - ![ITD Crown validation](imgs/Plot1_field_validation.jpg)
 
 3. **Crown width**: A strong linear relationship between the LiDAR-derived crown width and the crown widths measured in the field (R2 = 0.84).
    - ![The relationship between field-measured crown with and crown width extracted from LiDAR](imgs/cw_plot.png)
