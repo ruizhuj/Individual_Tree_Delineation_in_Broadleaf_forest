@@ -1,5 +1,3 @@
-![image](https://github.com/ruizhuj/Individual_Tree_Delineation_in_Broadleaf_forest/assets/16273623/02ddbef2-0e96-4e73-94ca-e680c50fa57e)---
-
 # Individual_Tree_Delineation_in_Broadleaf_forest
 
 This repository provides the code and documentation for the ITD method, crafted to delineate individual trees from Airborne LiDAR datasets. Our approach employs watershed segmentation built on top-edge-enhanced canopy height and density models, specifically tailored for broadleaf forests in Australia.
@@ -14,8 +12,9 @@ The ITD method offers an advanced approach to segmenting tree crowns in broadlea
    - ![Under-/Mid-storey and Overstorey Reclassification](imgs/las_reclassification.png) (*Image 1 vs Image 2*)
    
 2. **ITD Crown validation**: A comprehensive mapping of Tree crowns delineated using our method.
-   - ![Our ITD Crown validation](imgs/Plot1_ITD_field_validation.jpg)
-   - ![lidR ITD Crown validation](imgs/Plot1_lidR_field_validation.jpg)
+   - ![ITD Crown validation](imgs/Plot1_ITD_field_validation.jpg)
+
+3. **Crown width**: A strong linear relationship between the LiDAR-derived crown width and the crown widths measured in the field (R2 = 0.84).
    - ![The relationship between field-measured crown with and crown width extracted from LiDAR](imgs/cw_plot.png)
 
 ### Workflow:
@@ -33,7 +32,7 @@ Our ITD workflow encapsulates the entire process from raw ALS data to final tree
 (CHM×DHP) × (1.2 × treetops) + (CHM×DHP) × (1 - gaps) × (1 - edges) × (1 - treetops)
 ---
    
-![Workflow Diagram](imgs/workflow.jpg)
+![Workflow Diagram](imgs/workflow2.jpg)
 
 ## Dependencies:
 
