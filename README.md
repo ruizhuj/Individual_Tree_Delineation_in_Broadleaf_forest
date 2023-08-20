@@ -90,8 +90,11 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 ## Acknowledgements
 
 ---
-[![image](https://d2glwx35mhbfwf.cloudfront.net/v14.0.0/logo.svg)](https://safes.unimelb.edu.au/research)
-[![image](https://www.ari.vic.gov.au/__data/assets/image/0024/58623/ARI_logo_colour.jpg)](https://www.ari.vic.gov.au/about-us/about-ari)
+<a href="https://safes.unimelb.edu.au/research">
+  <img src="[https://www.ari.vic.gov.au/__data/assets/image/0024/58623/ARI_logo_colour.jpg](https://d2glwx35mhbfwf.cloudfront.net/v14.0.0/logo.svg)" alt="image" width="200"/>
+</a>
+---
+---
 <a href="https://www.ari.vic.gov.au/about-us/about-ari">
   <img src="https://www.ari.vic.gov.au/__data/assets/image/0024/58623/ARI_logo_colour.jpg" alt="image" width="200"/>
 </a>
