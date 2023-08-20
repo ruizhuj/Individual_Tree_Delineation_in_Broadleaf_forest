@@ -1,4 +1,4 @@
-# Individual_Tree_Delineation_in_Broadleaf_forest
+![image](https://github.com/ruizhuj/Individual_Tree_Delineation_in_Broadleaf_forest/assets/16273623/4b2d0a76-c529-4fc4-9e53-e27d4401a303)# Individual_Tree_Delineation_in_Broadleaf_forest
 
 This repository provides the code and documentation for the ITD method, crafted to delineate individual trees from Airborne LiDAR datasets. Our approach employs watershed segmentation built on top-edge-enhanced canopy height and density models, specifically tailored for broadleaf forests in Australia.
 
@@ -41,30 +41,46 @@ Our ITD workflow encapsulates the entire process from raw ALS data to final tree
 
 ## Getting Started
 
-1. **Clone the Repository**:
+1. **Clone the Repository in R**:
    ```bash
-   git clone [repository_link]
+   install.packages("git2r")
+   # Replace the URL with the repository you want to clone
+   repo_url <- "https://github.com/ruizhuj/Individual_Tree_Delineation_in_Broadleaf_forest"
+   # Clone the repository
+   git2r::clone(repo_url, local_path = "Individual_Tree_Delineation_in_Broadleaf_forest")
    ```
 
 2. **Install Dependencies**:
    ```bash
-   # Mention dependencies or setup commands
+   # Running under: Ubuntu 22.04.2 LTS
+   system('sudo apt-get install libfftw3-dev')
+   system('sudo apt-get install libfftw3-dev libfftw3-doc')
+   install.packages("lidR")
+   install.packages("rgdal")
+   install.packages('rgeos')
+   install.packages("future")
+   install.packages('plyr')
+   install.packages("spatstat")
+   install.packages("BiocManager")
+   BiocManager::install("fftwtools")
+   BiocManager::install("EBImage")
    ```
 
 3. **Run the ITD Method**:
    ```bash
-   # Command to execute the ITD method
+   check https://github.com/ruizhuj/Individual_Tree_Delineation_in_Broadleaf_forest/blob/main/examples/top_edge_enhanced_watershed_ITD_AUS.ipynb
    ```
 
 ## Documentation
 
-For a detailed understanding of our approach, algorithms, and results, please refer to [link_to_detailed_documentation_or_paper].
+For a detailed understanding of our approach, algorithms, and results, please refer to [http://hdl.handle.net/11343/234019] [https://doi.org/10.3390/rs15010060].
 
 ## References:
 
 ```r
 cite
 #> Jiang, R. Using LiDAR for landscape-scale mapping of potential habitat for the critically endangered Leadbeater's Possum. Diss. Doctoral dissertation, The University of Melbourne, Australia, 2019. http://hdl.handle.net/11343/234019
+#> Trouvé, Raphael, Ruizhu Jiang, Melissa Fedrigo, Matt D. White, Sabine Kasel, Patrick J. Baker, and Craig R. Nitschke. 2023. "Combining Environmental, Multispectral, and LiDAR Data Improves Forest Type Classification: A Case Study on Mapping Cool Temperate Rainforests and Mixed Forests" Remote Sensing 15, no. 1: 60. https://doi.org/10.3390/rs15010060
 ```    
 - Other important references...
 
@@ -74,8 +90,9 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgements
 
-A special thanks to the contributors, collaborators, and the community for their invaluable feedback and suggestions.
-
+A special thanks to the contributors and collaborators for their invaluable feedback and suggestions.
+[![image](https://d2glwx35mhbfwf.cloudfront.net/v14.0.0/logo.svg)](https://safes.unimelb.edu.au/research)
+[![image](https://www.ari.vic.gov.au/__data/assets/image/0024/58623/ARI_logo_colour.jpg)](https://www.ari.vic.gov.au/about-us/about-ari)
 ---
 
 **Note**: Make sure to replace placeholders (like `path_to_image`, `repository_link`, etc.) with actual paths or links relevant to your project. This is a basic template and can be expanded or modified based on your project's specific requirements.
