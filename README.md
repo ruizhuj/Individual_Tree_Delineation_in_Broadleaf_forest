@@ -1,4 +1,4 @@
-![image](https://github.com/ruizhuj/Individual_Tree_Delineation_in_Broadleaf_forest/assets/16273623/4b2d0a76-c529-4fc4-9e53-e27d4401a303)# Individual_Tree_Delineation_in_Broadleaf_forest
+# Individual_Tree_Delineation_in_Broadleaf_forest
 
 This repository provides the code and documentation for the ITD method, crafted to delineate individual trees from Airborne LiDAR datasets. Our approach employs watershed segmentation built on top-edge-enhanced canopy height and density models, specifically tailored for broadleaf forests in Australia.
 
@@ -82,7 +82,6 @@ cite
 #> Jiang, R. Using LiDAR for landscape-scale mapping of potential habitat for the critically endangered Leadbeater's Possum. Diss. Doctoral dissertation, The University of Melbourne, Australia, 2019. http://hdl.handle.net/11343/234019
 #> Trouvé, Raphael, Ruizhu Jiang, Melissa Fedrigo, Matt D. White, Sabine Kasel, Patrick J. Baker, and Craig R. Nitschke. 2023. "Combining Environmental, Multispectral, and LiDAR Data Improves Forest Type Classification: A Case Study on Mapping Cool Temperate Rainforests and Mixed Forests" Remote Sensing 15, no. 1: 60. https://doi.org/10.3390/rs15010060
 ```    
-- Other important references...
 
 ## License
 
@@ -90,7 +89,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgements
 
-A special thanks to the contributors and collaborators for their invaluable feedback and suggestions.
+---
 [![image](https://d2glwx35mhbfwf.cloudfront.net/v14.0.0/logo.svg)](https://safes.unimelb.edu.au/research)
 [![image](https://www.ari.vic.gov.au/__data/assets/image/0024/58623/ARI_logo_colour.jpg)](https://www.ari.vic.gov.au/about-us/about-ari)
 ---
