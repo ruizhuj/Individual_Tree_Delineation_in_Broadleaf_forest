@@ -98,5 +98,9 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
   <img src="https://www.ari.vic.gov.au/__data/assets/image/0024/58623/ARI_logo_colour.jpg" alt="image" height="100"/>
 </a>
 
+<a href="https://www.vicforests.com.au">
+  <img src="https://www.vicforests.com.au/static/uploads/images/color-logo-wffawoudhots.svg" alt="image" height="100"/>
+</a>
+
 ---
 
