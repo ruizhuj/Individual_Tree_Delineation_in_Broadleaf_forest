@@ -91,7 +91,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ---
 <a href="https://safes.unimelb.edu.au/research">
-  <img src="https://d2glwx35mhbfwf.cloudfront.net/v14.0.0/logo.svg" alt="image" height="100"/>
+  <img src="https://d2glwx35mhbfwf.cloudfront.net/v14.0.0/logo.svg" alt="image" height="120"/>
 </a>
 
 <a href="https://www.ari.vic.gov.au/about-us/about-ari">
@@ -99,7 +99,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 </a>
 
 <a href="https://www.vicforests.com.au">
-  <img src="https://www.vicforests.com.au/static/uploads/images/color-logo-wffawoudhots.svg" alt="image" height="100"/>
+  <img src="https://www.vicforests.com.au/static/uploads/images/color-logo-wffawoudhots.svg" alt="image" height="80"/>
 </a>
 
 ---
