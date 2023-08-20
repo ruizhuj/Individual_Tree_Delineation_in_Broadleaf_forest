@@ -91,7 +91,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ---
 <a href="https://safes.unimelb.edu.au/research">
-  <img src="[https://www.ari.vic.gov.au/__data/assets/image/0024/58623/ARI_logo_colour.jpg](https://d2glwx35mhbfwf.cloudfront.net/v14.0.0/logo.svg)" alt="image" width="200"/>
+  <img src="https://d2glwx35mhbfwf.cloudfront.net/v14.0.0/logo.svg" alt="image" width="200"/>
 </a>
 ---
 ---
