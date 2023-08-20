@@ -92,6 +92,9 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 ---
 [![image](https://d2glwx35mhbfwf.cloudfront.net/v14.0.0/logo.svg)](https://safes.unimelb.edu.au/research)
 [![image](https://www.ari.vic.gov.au/__data/assets/image/0024/58623/ARI_logo_colour.jpg)](https://www.ari.vic.gov.au/about-us/about-ari)
+<a href="https://www.ari.vic.gov.au/about-us/about-ari">
+  <img src="https://www.ari.vic.gov.au/__data/assets/image/0024/58623/ARI_logo_colour.jpg" alt="image" width="200"/>
+</a>
+
 ---
 
-**Note**: Make sure to replace placeholders (like `path_to_image`, `repository_link`, etc.) with actual paths or links relevant to your project. This is a basic template and can be expanded or modified based on your project's specific requirements.
