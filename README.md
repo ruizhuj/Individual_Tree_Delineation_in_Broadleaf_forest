@@ -85,7 +85,9 @@ cite
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+---
+[![DOI](https://zenodo.org/badge/676366054.svg)](https://zenodo.org/badge/latestdoi/676366054)
+---
 
 ## Acknowledgements
 
