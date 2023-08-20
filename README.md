@@ -68,7 +68,7 @@ Our ITD workflow encapsulates the entire process from raw ALS data to final tree
 
 3. **Run the ITD Method**:
    ```bash
-   check https://github.com/ruizhuj/Individual_Tree_Delineation_in_Broadleaf_forest/blob/main/examples/top_edge_enhanced_watershed_ITD_AUS.ipynb
+   [![image](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1fTZ-cptLAbT0UVkT0VfCUtkrBCiwBWiM?usp=sharing)
    ```
 
 ## Documentation
