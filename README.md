@@ -80,6 +80,7 @@ For a detailed understanding of our approach, algorithms, and results, please re
 ```r
 cite
 #> Jiang, R. Using LiDAR for landscape-scale mapping of potential habitat for the critically endangered Leadbeater's Possum. Diss. Doctoral dissertation, The University of Melbourne, Australia, 2019. http://hdl.handle.net/11343/234019
+#> Trouvé, Raphaël, Ruizhu Jiang, Patrick J. Baker, Sabine Kasel, and Craig R. Nitschke. 2024. "Identifying Old-Growth Forests in Complex Landscapes: A New LiDAR-Based Estimation Framework and Conservation Implications" Remote Sensing 16, no. 1: 147. https://doi.org/10.3390/rs16010147
 #> Trouvé, Raphael, Ruizhu Jiang, Melissa Fedrigo, Matt D. White, Sabine Kasel, Patrick J. Baker, and Craig R. Nitschke. 2023. "Combining Environmental, Multispectral, and LiDAR Data Improves Forest Type Classification: A Case Study on Mapping Cool Temperate Rainforests and Mixed Forests" Remote Sensing 15, no. 1: 60. https://doi.org/10.3390/rs15010060
 ```    
 
