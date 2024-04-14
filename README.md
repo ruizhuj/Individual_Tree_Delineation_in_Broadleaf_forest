@@ -6,6 +6,9 @@ This repository provides the code and documentation for the ITD method, crafted 
 
 The ITD method offers an advanced approach to segmenting tree crowns in broadleaf forests. [![image](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1fTZ-cptLAbT0UVkT0VfCUtkrBCiwBWiM?usp=sharing)
 
+Also the Supplementary Material for:
+Trouvé, Raphaël, Ruizhu Jiang, Patrick J. Baker, Sabine Kasel, and Craig R. Nitschke. 2024. "Identifying Old-Growth Forests in Complex Landscapes: A New LiDAR-Based Estimation Framework and Conservation Implications" Remote Sensing 16, no. 1: 147. https://doi.org/10.3390/rs16010147
+
 ### Highlights:
 
 1. **Reclassification of Vegetation Point Clouds**: Our method effectively segregates vegetation point clouds into under-/mid-storey and overstorey.
