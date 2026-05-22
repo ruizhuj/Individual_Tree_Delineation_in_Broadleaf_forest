@@ -1,0 +1,418 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(EBImage)
+library(lidR)
+library(spatstat)
+library(sf)
+library(sp)
+library(raster)
+library(plyr)
+library(stringr)
+library(dplyr)
+library(zoo)
+library(ggplot2)
+library(gridExtra)
+```
+
+
+```{r}
+# Create crown base height from canopy height model (chm)
+HCBM <- function(chm){
+  chmf3max <- raster::focal(chm, w = matrix(1,3,3), fun = max, na.rm = TRUE,pad=TRUE)
+  HCBM = (chmf3max >= 45)*(chmf3max* 0.4 + 1.2)+15*(chmf3max <45)
+  return(HCBM)
+}
+# Identify forest gap
+gap_mask <- function(raster,nb,a=0.25,b=0.05){ # nb is the neighborhood range
+  res <- res(raster)[1]
+  n <- as.integer(nb/res) + 1
+  r_fmean <- raster::focal(raster, w = matrix(1,n,n), fun = mean, na.rm = TRUE,pad=TRUE)
+  r_fsd <- raster::focal(raster, w =  matrix(1,n,n), fun = sd, na.rm = TRUE,pad=TRUE)
+  tr <- as.data.frame(raster)[,1]
+  tr <- tr[!is.na(tr)]
+  tr <- tr[tr>0]
+  tr <- quantile(tr, b)
+  mask = (raster - (r_fmean - r_fsd*a) <0) |(raster<tr)
+  mask[is.na(mask[])] <- 0
+  mask <- raster::focal(mask, w = matrix(1,3,3), fun = min, na.rm = TRUE,pad=TRUE)
+  mask<- resample(mask, raster, method = 'bilinear')
+  return(mask)
+}
+# smooth the midstorey canopy height model (chm)
+smooth_ms <- function(raster,nb=3,a=0.25,b=0.95,c=1.5){ # nb is the neighborhood range
+  res <- res(raster)[1]
+  n <- as.integer(nb/res) + 1
+  r_fmean <- raster::focal(raster, w = matrix(1,n,n), fun = mean, na.rm = TRUE,pad=TRUE)
+  r_fsd <- raster::focal(raster, w =  matrix(1,n,n), fun = sd, na.rm = TRUE,pad=TRUE)
+  tr <- as.data.frame(raster)[,1]
+  tr <- tr[!is.na(tr)]
+  tr <- tr[tr>0]
+  tr <- quantile(tr, b)
+  # print(tr)
+  pits = ((raster - (r_fmean + r_fsd*a)) >= 0) * (raster>tr)
+  pits[is.na(pits[])] <- 0
+  pits <- raster::focal(pits, w = matrix(1,3,3), fun = max, na.rm = TRUE,pad=TRUE)
+  pits<- resample(pits, raster, method = 'bilinear')
+  
+  S1= pits*(r_fmean-c*r_fsd) + (1-pits)*raster
+  S1 = S1 * (S1>=0)
+  smooth = raster::focal(S1, w = matrix(1,3,3), fun = mean, na.rm = TRUE,pad=TRUE)
+  return(smooth)
+}
+# reclassify the LiDAR point cloud into overstory (class 15) and midstory (class 6)
+reclass_laz <- function(laz,chm,HCBM_r,gap=gap_20m){
+  chmf3max <- raster::focal(chm, w = matrix(1,3,3), fun = max, na.rm = TRUE,pad=TRUE)
+  HCBM_gap <- gap * chmf3max + (1 - gap) * HCBM_r
+  HCBM_gap[is.na(HCBM_gap[])] <- 0
+  HCBM_gap[is.infinite(HCBM_gap[])] <- 0
+  
+  laz_rmCBM <- laz-HCBM_gap
+  ms_laz <- filter_poi(laz_rmCBM,Z< -1 | Classification == 2)
+  ms_laz@data$Z <- ms_laz@data$Zref
+  rm(laz_rmCBM)
+  ms_chm <- rasterize_canopy(ms_laz, 0.5, p2r())
+  ms_schm= smooth_ms(ms_chm)
+  ms_schm_f=raster::focal((ms_schm+2), w = matrix(1,3,3), fun = max, na.rm = TRUE,pad=TRUE)
+  ms_schm_f <- raster::raster(ms_schm_f)
+  ms_schm_fmax <- gap*chmf3max+(1-gap)*ms_schm_f
+  
+  #ms_schm_fmax <- gap*chmf3max+(1-gap)*raster::focal((ms_schm+2), w = matrix(1,3,3), fun = max, na.rm = TRUE,pad=TRUE)
+  ms_schm_fmax[is.na(ms_schm_fmax[])] <- 0
+  ms_schm_fmax[is.infinite(ms_schm_fmax[])] <- 0
+  
+  laz_reclass <- laz-ms_schm_fmax
+  ms_laz <- filter_poi(laz_reclass,Z< 1 & Z>=-15 & Classification != 2 & Zref <30)
+  ms_laz@data$Classification <- 6
+  os_laz <- filter_poi(laz_reclass,Z >=1 & Classification != 2)
+  os_laz@data$Classification <- 15
+  laz_reclass <- rbind(os_laz,ms_laz,filter_poi(laz_reclass,Classification == 2))
+  laz_reclass@data$Z <- laz_reclass@data$Zref
+  rm(ms_laz,os_laz)
+  
+  return(laz_reclass)
+}
+# create the density of high points (DHP) from overstorey LiDAR points
+DHPM <- function(os_laz,os_chm,cz = 0.5,r=3){
+  extent <- extent(raster(os_chm))
+  x_left <- extent[1]
+  x_right <- extent[2]
+  y_bottom <- extent[3]
+  y_top <- extent[4]
+  # Create a window using the extracted coordinates
+  window <- owin(xrange = c(x_left, x_right), yrange = c(y_bottom, y_top))
+  os_ppp <- ppp(x = os_laz@data$X, y = os_laz@data$Y,window = window, check = T)
+  DHP<- raster(density(os_ppp,sigma=cz*r, eps=cz,edge=T))#, kernel = "quartic"
+  return(DHP)
+}
+# function of variable window size to identify local max (treetop)
+vari_wz <- function(x) {
+  y <- 2.6 * (-(exp(-0.08*(x-2)) - 1)) + 3
+  y[x < 2] <- 3
+  y[x > 20] <- 5
+  return(y)
+}
+# transfer treetop geopoints shapefile to raster format
+ttops_raster <- function(raster,geopnts){
+  r <- raster(ncol=ncol(raster), nrow=nrow(raster))
+  extent(r) <- extent(raster)
+  crs(r) <- raster@crs
+  ttops_r <- rasterize(as.data.frame(st_coordinates(geopnts))[,1:2], r,  field = geopnts$Z, fun=max, background=0)
+  w3 <- matrix(c(0,1,0,1,1,1,0,1,0), nr=3,nc=3)
+  ttops_r_fmax <- as.integer(raster::focal(ttops_r, w = w3, fun = max, na.rm = TRUE)>=2)
+  #ttops_r_fmax <- raster::focal(ttops_r_fmax, w = matrix(1,3,3), fun = max, na.rm = TRUE)
+  return(ttops_r_fmax)
+}
+# detection of crown edge
+edge<- function(raster,nb=5,a=0.5,b=3){
+  res <- res(raster)[1]
+  n <- as.integer(nb/res) + 1
+  AOC <- terrain(raster, opt = "aspect")
+  SOA <- terrain(AOC, opt = "slope")
+  
+  reAOC <- terrain((maxValue(raster)-raster), opt = "aspect")
+  reSOA <- terrain(reAOC, opt = "slope")
+  
+  AdSOA = ((SOA+reSOA) * 0.5 - abs(SOA-reSOA) * 0.5)
+  AdSOA_fmean <- raster::focal(AdSOA, w = matrix(1,n,n), fun = mean, na.rm = TRUE,pad=TRUE)
+  AdSOA_fsd <- raster::focal(AdSOA, w = matrix(1,n,n), fun = sd, na.rm = TRUE,pad=TRUE)
+  
+  
+  r_fmean <- raster::focal(raster, w = matrix(1,n,n), fun = mean, na.rm = TRUE,pad=TRUE)
+  ridge =as.integer(((raster - r_fmean)>0.5)* ((AdSOA - (AdSOA_fmean-AdSOA_fsd*a))>0))
+  edge <- (1-ridge)*as.integer(((raster - r_fmean) < -0.5)* ((AdSOA - (AdSOA_fmean-AdSOA_fsd/b))>0))
+  #w3 <- matrix(c(0,1,0,1,1,1,0,1,0), nr=3,nc=3)
+  #edge <- raster::focal(edge, w = w3, fun = min, na.rm = TRUE,pad=TRUE)
+  edge[edge == 0] <- NA
+  return(edge)
+}
+# edge thinning
+# thin_edge<- function(edge,raster){
+#   polygons <- rasterToPolygons(edge)#, dissolve = TRUE
+#   buffer_polygons <- gBuffer(polygons, byid = F, joinStyle='ROUND',mitreLimit=5,width = 0.5)
+#   shrunken_polygons <- gBuffer(buffer_polygons, byid =F, width = -1)
+#   # Rasterize the polygons into the empty raster
+#   thin_edge <- rasterize(shrunken_polygons, raster, field = 1)
+#   return(thin_edge)
+# }
+```
+
+```{r}
+lasfiles <- list.files(path="Y:/Project20210619_newITD/EGLiDAR_code/Input/test_laz",pattern='.laz$',full.names = T)
+file= lasfiles[2]
+plotname = tools::file_path_sans_ext(basename(file))
+
+### read LAZ
+las <- readLAS(file)
+
+### Noise removal
+las <- classify_noise(las, sor(15,7))
+las <- filter_poi(las, Classification != LASNOISE)
+
+### DTM generation and height normalization
+cz = 0.5
+dtm <- grid_terrain(las, cz, knnidw(k = 6L, p = 2))
+dtm <- (dtm>=min(las@data$Z))*dtm + (dtm<min(las@data$Z))*min(las@data$Z)
+las <- normalize_height(las, dtm)
+rm(dtm)
+print("normalize height ALS")
+
+las <- filter_poi(las, Z >= 0 & Z <= 100)
+las@data$Zref <- NULL
+
+###0.5 m CHM generation
+chm <- grid_canopy(las, res =0.5,pitfree(subcircle = 0.2))
+plot(chm, main = 'Canopy height model (CHM) of all LiDAR point clouds')
+```
+```{r}
+HCBM_r <- HCBM(chm)
+gap_20m <- gap_mask(chm,20)
+```
+
+
+```{r}
+laz_reclass <- reclass_laz(las,chm,HCBM_r,gap=gap_20m)
+os_chm <- rasterize_canopy(filter_poi(laz_reclass,Classification != 6), 0.5, pitfree(subcircle = 0.2))
+os_laz = filter_poi(laz_reclass,Classification == 15)
+DHP<- DHPM(os_laz,os_chm)
+plot(DHP,main='densities of high points model (DHP)')
+```
+
+```{r}
+DHP<- raster::resample(DHP, raster(os_chm), method = 'bilinear')
+DHPCHM = raster(os_chm) * DHP
+DHPCHM <- DHPCHM / maxValue(DHPCHM) * 50
+ttops_f <- locate_trees(DHPCHM, lmf(vari_wz))
+# transfer treetop shpfile to raster file format
+ttops_r_fmax <- ttops_raster(DHPCHM,ttops_f)
+```
+```{r}
+crown_edge <- edge(raster::focal(DHPCHM, w = matrix(1,3,3), fun = mean, na.rm = TRUE,pad=TRUE))
+plot(crown_edge)
+```
+```{r}
+thin_binary_raster <- function(r, max_iter = 100) {
+  
+  # Convert raster to binary matrix
+  m <- as.matrix(r)
+  m[is.na(m)] <- 0
+  m <- ifelse(m > 0, 1L, 0L)
+  
+  nr <- nrow(m)
+  nc <- ncol(m)
+  
+  zhang_suen_step <- function(m, step = 1) {
+    
+    marker <- matrix(FALSE, nrow(m), ncol(m))
+    
+    for (i in 2:(nrow(m) - 1)) {
+      for (j in 2:(ncol(m) - 1)) {
+        
+        if (m[i, j] != 1) next
+        
+        p2 <- m[i - 1, j]
+        p3 <- m[i - 1, j + 1]
+        p4 <- m[i,     j + 1]
+        p5 <- m[i + 1, j + 1]
+        p6 <- m[i + 1, j]
+        p7 <- m[i + 1, j - 1]
+        p8 <- m[i,     j - 1]
+        p9 <- m[i - 1, j - 1]
+        
+        neighbors <- c(p2, p3, p4, p5, p6, p7, p8, p9)
+        
+        B <- sum(neighbors)
+        A <- sum(neighbors == 0 & c(neighbors[-1], neighbors[1]) == 1)
+        
+        if (step == 1) {
+          cond <- (p2 * p4 * p6 == 0) && (p4 * p6 * p8 == 0)
+        } else {
+          cond <- (p2 * p4 * p8 == 0) && (p2 * p6 * p8 == 0)
+        }
+        
+        if (A == 1 && B >= 2 && B <= 6 && cond) {
+          marker[i, j] <- TRUE
+        }
+      }
+    }
+    
+    m[marker] <- 0L
+    return(m)
+  }
+  
+  for (k in seq_len(max_iter)) {
+    old <- m
+    
+    m <- zhang_suen_step(m, step = 1)
+    m <- zhang_suen_step(m, step = 2)
+    
+    if (identical(m, old)) break
+  }
+  
+  out <- r
+  out[] <- as.vector(t(m))
+  out[is.na(out[])] <- 0
+  
+  return(out)
+}
+thin_edge <- thin_binary_raster(crown_edge)
+plot(thin_edge)
+```
+
+```{r}
+# forest gap detection based on CHM×DHP layer
+gap2_20m <- gap_mask(DHPCHM,20)
+thin_edge[is.na(thin_edge[])] <- 0
+WF_DCHM = DHPCHM * 1.2 * ttops_r_fmax + DHPCHM * (1 - gap2_20m) * (1 -thin_edge)* (1 - ttops_r_fmax) #
+plot(WF_DCHM,main = 'top-edge-enhanced DHPCHM layer')
+```
+
+```{r}
+watershed <- lidR::watershed(chm = WF_DCHM, th_tree = 2)
+w_crowns <- watershed()
+mask_crowns <- mask(w_crowns, gap2_20m, maskvalue=TRUE)
+crowns_pol <- rasterToPolygons(mask_crowns,dissolve=TRUE)
+```
+
+```{r}
+plot(chm)#, col = height.colors(50)
+plot(sf::st_geometry(ttops_f), add = TRUE, pch = 3,col='red')
+plot(crowns_pol, add = TRUE)
+```
+```{r}
+trees  = segment_trees(laz_reclass, watershed)
+tree_table <- data.frame(plyr::count(trees@data$treeID))
+small_trees <- tree_table$x[tree_table$freq > 20]
+trees <- filter_poi(trees, treeID %in% small_trees)
+
+hulls  = delineate_crowns(filter_poi(trees, !is.na(treeID)), func = .stdmetrics)
+```
+
+```{r}
+plot(
+  chm,
+  main = "overstorey layer-stacked DHP with OS-crown"
+)
+
+plot(
+  hulls,
+  add = TRUE,
+  lwd = 1
+)
+
+cent <- coordinates(hulls)
+
+text(
+  cent[,1],
+  cent[,2],
+  labels = hulls@data$treeID,
+  cex = 0.6,
+  col = "red"
+)
+```
+```{r}
+hulls_sel <- hulls[hulls@data$zmax > 50, ]
+
+plot(
+  chm,
+  main = "overstorey layer-stacked DHP with OS-crown"
+)
+
+plot(
+  hulls_sel ,
+  add = TRUE,
+  lwd = 1
+)
+
+cent <- coordinates(hulls_sel)
+
+text(
+  cent[,1],
+  cent[,2],
+  labels = hulls_sel@data$treeID,
+  cex = 0.6,
+  col = "red"
+)
+```
+```{r}
+coords <- sf::st_coordinates(ttops_f)
+
+ttops_f$X <- coords[,1]
+ttops_f$Y <- coords[,2]
+```
+
+```{r}
+IDs = c(22,61)
+t1 = filter_poi(trees, treeID %in% IDs)
+plot(t1)
+t1_tops <- subset(ttops_f, X >= min(t1@data$X) & X <= max(t1@data$X) & Y >= min(t1@data$Y) & Y <= max(t1@data$Y))
+
+p1 <- ggplot(t1@data, aes(x=X, y=Z, color=as.factor(Classification))) +
+  geom_point()+ theme(legend.position = "none") +geom_vline(xintercept = t1_tops$X)
+
+p2 <- ggplot(t1@data, aes(x=Y, y=Z, color=as.factor(Classification))) +
+  geom_point()+theme(legend.title=element_blank())+geom_vline(xintercept = t1_tops$Y) #+ theme(legend.position = "top")
+grid.arrange(p1, p2, nrow = 1,top = paste0("TreeID:", paste(IDs, collapse = ", ")))
+```
+
+```{r}
+IDs = c(66)
+t1 = filter_poi(trees, treeID %in% IDs)
+plot(t1)
+t1_tops <- subset(ttops_f, X >= min(t1@data$X) & X <= max(t1@data$X) & Y >= min(t1@data$Y) & Y <= max(t1@data$Y))
+
+p1 <- ggplot(t1@data, aes(x=X, y=Z, color=as.factor(Classification))) +
+  geom_point()+ theme(legend.position = "none") +geom_vline(xintercept = t1_tops$X)
+
+p2 <- ggplot(t1@data, aes(x=Y, y=Z, color=as.factor(Classification))) +
+  geom_point()+theme(legend.title=element_blank())+geom_vline(xintercept = t1_tops$Y) #+ theme(legend.position = "top")
+grid.arrange(p1, p2, nrow = 1,top = paste0("TreeID:", paste(IDs, collapse = ", ")))
+```
+
+```{r}
+IDs = c(40,94)
+t1 = filter_poi(trees, treeID %in% IDs)
+plot(t1)
+t1_tops <- subset(ttops_f, X >= min(t1@data$X) & X <= max(t1@data$X) & Y >= min(t1@data$Y) & Y <= max(t1@data$Y))
+
+p1 <- ggplot(t1@data, aes(x=X, y=Z, color=as.factor(Classification))) +
+  geom_point()+ theme(legend.position = "none") +geom_vline(xintercept = t1_tops$X)
+
+p2 <- ggplot(t1@data, aes(x=Y, y=Z, color=as.factor(Classification))) +
+  geom_point()+theme(legend.title=element_blank())+geom_vline(xintercept = t1_tops$Y) #+ theme(legend.position = "top")
+grid.arrange(p1, p2, nrow = 1,top = paste0("TreeID:", paste(IDs, collapse = ", ")))
+```
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
