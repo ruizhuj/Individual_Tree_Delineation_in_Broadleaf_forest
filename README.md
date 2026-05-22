@@ -1,150 +1,112 @@
-# LiDAR Individual Tree Detection using Layer-Stacked DHP
+# Individual_Tree_Delineation_in_Broadleaf_forest
 
-![Workflow comparison](img/Two_methods_Compare.png)
+This repository provides the code and documentation for the ITD method, crafted to delineate individual trees from Airborne LiDAR datasets. Our approach employs watershed segmentation built on top-edge-enhanced canopy height and density models, specifically tailored for broadleaf forests in Australia.
 
 ## Overview
 
-This repository contains an unpublished research prototype for individual tree detection (ITD) and canopy layer separation from airborne LiDAR data.
+The ITD method offers an advanced approach to segmenting tree crowns in broadleaf forests. [![image](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1fTZ-cptLAbT0UVkT0VfCUtkrBCiwBWiM?usp=sharing)
 
-The workflow was developed for structurally complex forests, particularly tall multi-layered forests where conventional canopy-height-model (CHM) based approaches often struggle to distinguish overstorey and mid-storey vegetation.
+Also the Supplementary Material for:
+Trouvé, Raphaël, Ruizhu Jiang, Patrick J. Baker, Sabine Kasel, and Craig R. Nitschke. 2024. "Identifying Old-Growth Forests in Complex Landscapes: A New LiDAR-Based Estimation Framework and Conservation Implications" Remote Sensing 16, no. 1: 147. https://doi.org/10.3390/rs16010147
 
-Unlike conventional ITD methods that estimate crown base height directly from the canopy height model, this workflow uses a **Vertical Foliage Cover Profile (FCP)** derived from the LiDAR point cloud to identify canopy structural transitions. These transitions are then used to separate overstorey and lower canopy layers prior to crown segmentation.
+### Highlights:
 
-The method is intended for research discussion and algorithm evaluation rather than operational deployment.
+1. **Reclassification of Vegetation Point Clouds**: Our method effectively segregates vegetation point clouds into under-/mid-storey and overstorey.
+   ![Under-/Mid-storey and Overstorey Reclassification](imgs/las_reclassification.png)
+   
+2. **ITD Crown validation**: A comprehensive mapping of Tree crowns delineated using our method.
+   ![ITD Crown validation](imgs/Plot1_field_validation.jpg)
+
+3. **Crown width**: A strong linear relationship between the LiDAR-derived crown width and the crown widths measured in the field (R2 = 0.84).
+   ![The relationship between field-measured crown with and crown width extracted from LiDAR](imgs/cw_plot.png)
+
+### Workflow:
+
+Our ITD workflow encapsulates the entire process from raw ALS data to final tree crown delineation, including the following steps
+1. Create a 50cm resolution CHM.
+2. Create  an HCBM from the HCB-HT relationship using field data (Figure 1).
+3. Identify canopy gaps.
+4. Filter out the under-/mid-storey points below the HCBM, retaining only overstorey LiDAR points.
+5. Exclude points within canopy gaps.
+6. Generate a densities of high points model (DHP) using overstorey crown points.
+7. Pinpoint treetops and crown edges via targeted CHM×DHP raster layers.
+8. Perform marker-control watershed delineation on a top-edge-enhanced CHM×DHP layer, calculated as:
+(CHM×DHP) × (1.2 × treetops) + (CHM×DHP) × (1 - gaps) × (1 - edges) × (1 - treetops)
+   
+![Workflow Diagram](imgs/workflow2.jpg)
+
+## Dependencies:
+
+* lidR
+* raster
+* EBImage
+* spatstat
+
+## Getting Started
+
+1. **Clone the Repository in R**:
+   ```bash
+   install.packages("git2r")
+   # Replace the URL with the repository you want to clone
+   repo_url <- "https://github.com/ruizhuj/Individual_Tree_Delineation_in_Broadleaf_forest"
+   # Clone the repository
+   git2r::clone(repo_url, local_path = "Individual_Tree_Delineation_in_Broadleaf_forest")
+   ```
+
+2. **Install Dependencies**:
+   ```bash
+   # Running under: Ubuntu 22.04.2 LTS
+   system('sudo apt-get install libfftw3-dev')
+   system('sudo apt-get install libfftw3-dev libfftw3-doc')
+   install.packages("lidR")
+   install.packages("rgdal")
+   install.packages('rgeos')
+   install.packages("future")
+   install.packages('plyr')
+   install.packages("spatstat")
+   install.packages("BiocManager")
+   BiocManager::install("fftwtools")
+   BiocManager::install("EBImage")
+   ```
+
+3. **Run the ITD Method**:
+   
+   [![image](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1fTZ-cptLAbT0UVkT0VfCUtkrBCiwBWiM?usp=sharing)
+   
+
+## Documentation
+
+For a detailed understanding of our approach, algorithms, and results, please refer to [http://hdl.handle.net/11343/234019] [https://doi.org/10.3390/rs15010060].
+
+## References:
+
+```r
+cite
+#> Jiang, R. Using LiDAR for landscape-scale mapping of potential habitat for the critically endangered Leadbeater's Possum. Diss. Doctoral dissertation, The University of Melbourne, Australia, 2019. http://hdl.handle.net/11343/234019
+#> Trouvé, Raphaël, Ruizhu Jiang, Patrick J. Baker, Sabine Kasel, and Craig R. Nitschke. 2024. "Identifying Old-Growth Forests in Complex Landscapes: A New LiDAR-Based Estimation Framework and Conservation Implications" Remote Sensing 16, no. 1: 147. https://doi.org/10.3390/rs16010147
+#> Trouvé, Raphael, Ruizhu Jiang, Melissa Fedrigo, Matt D. White, Sabine Kasel, Patrick J. Baker, and Craig R. Nitschke. 2023. "Combining Environmental, Multispectral, and LiDAR Data Improves Forest Type Classification: A Case Study on Mapping Cool Temperate Rainforests and Mixed Forests" Remote Sensing 15, no. 1: 60. https://doi.org/10.3390/rs15010060
+```    
+
+## License
+
+---
+[![DOI](https://zenodo.org/badge/676366054.svg)](https://zenodo.org/badge/latestdoi/676366054)
+---
+
+## Acknowledgements
+
+---
+<a href="https://safes.unimelb.edu.au/research">
+  <img src="https://d2glwx35mhbfwf.cloudfront.net/v14.0.0/logo.svg" alt="image" height="120"/>
+</a>
+
+<a href="https://www.ari.vic.gov.au/about-us/about-ari">
+  <img src="https://www.ari.vic.gov.au/__data/assets/image/0024/58623/ARI_logo_colour.jpg" alt="image" height="100"/>
+</a>
+
+<a href="https://www.vicforests.com.au">
+  <img src="https://www.vicforests.com.au/static/uploads/images/color-logo-wffawoudhots.svg" alt="image" height="80"/>
+</a>
 
 ---
 
-## Workflow
-
-```text
-Input LAZ from AWS
-        ↓
-Noise removal
-        ↓
-DTM generation and height normalization
-        ↓
-0.5 m CHM generation
-        ↓
-Vertical foliage profile analysis (New)
-        ↓
-Detect plot-level canopy break and canopy peak
-        ↓
-Determine stand type / ash-like tall forest
-        ↓
-Upper canopy (OS-crown) point extraction
-        ↓
-Layer-stacked DHP × CHM generation (New)
-        ↓
-Adaptive treetop detection
-        ↓
-Marker-enhanced watershed
-        ↓
-Overstorey crown segmentation
-        ↓
-Crown-level height distribution analysis
-        ↓
-Estimate mid-storey reference height per crown
-        ↓
-Generate mid-storey reference surface
-        ↓
-Point-cloud reclassification into
-lower/mid-storey and overstorey
-```
-
----
-
-## Key Innovations
-
-### 1. Layer-Stacked DHP
-
-The core canopy representation is a **Layer-Stacked Density Height Product (DHP)**.
-
-Instead of using only canopy height, DHP accumulates foliage density information through multiple vertical layers:
-
-```text
-DHP = Σ (layer density × chm)
-```
-
-where density is calculated independently within each vertical slice.
-
-This representation preserves both:
-
-- canopy height information
-- vertical foliage distribution
-- canopy structural complexity
-
-and provides a more stable canopy surface for treetop detection in complex forests.
-
----
-
-### 2. FCP-Based Canopy Layer Separation
-
-A major difference from the previous workflow is that canopy separation is no longer derived directly from CHM-based crown-base-height formulas.
-
-Instead:
-
-1. A plot-level Foliage Cover Profile (FCP) is generated from the normalized LiDAR point cloud.
-2. Vertical canopy breaks are identified from the FCP curve.
-3. Foliage density peaks are detected.
-4. These structural features are used to distinguish overstorey and lower canopy layers.
-
-This approach better reflects the actual vertical forest structure and reduces dependence on local CHM artefacts.
-
----
-
-### 3. Crown-Based Mid-Storey Reference Surface
-
-After overstorey crowns are segmented:
-
-- crown-level height distributions are analysed
-- crown-specific mid-storey reference heights are estimated
-- a continuous mid-storey reference surface is generated
-
-The reference surface is then used to classify points into:
-
-- Overstorey
-- Lower / Mid-storey
-- Ground
-
-without requiring a second crown segmentation pass.
-
----
-
-## Comparison with Previous Method
-
-The previous version estimated crown base height directly from the canopy height model and relied on iterative crown segmentation.
-
-The current workflow:
-
-- introduces Layer-Stacked DHP
-- uses FCP-derived canopy breaks
-- performs crown-based mid-storey surface estimation
-
-As illustrated above, the updated workflow produces a more realistic separation of canopy layers in structurally complex forests while reducing crown over-segmentation.
-
-
----
-
-## Important Notes
-
-- This code is shared for research discussion only.
-- The workflow is an unpublished research prototype.
-- It has not been packaged as a general-purpose software tool.
-- Input/output paths need to be modified before use.
-- Parameters may need adjustment for different forest types, canopy structures, and LiDAR point densities.
-- The workflow has primarily been tested on Australian forest datasets.
-
----
-
-## Research Use
-
-This repository is shared for research discussion and algorithm evaluation.
-
-If you find the workflow useful, please consider acknowledging the repository or citing the methodology where appropriate.
-
-If you share, adapt, or apply this workflow to other forest types or LiDAR datasets, I would greatly appreciate being informed of your experience and results.
-
-For questions, feedback, or collaboration opportunities, please contact:
-
-**Ruizhu Jiang**  
-📧 ruizhu.jiang@uq.edu.au
