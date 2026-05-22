@@ -8,7 +8,7 @@ This repository contains an unpublished research prototype for individual tree d
 
 The workflow was developed for structurally complex forests, particularly tall multi-layered forests where conventional canopy-height-model (CHM) based approaches often struggle to distinguish overstorey and mid-storey vegetation.
 
-Unlike conventional ITD methods that estimate crown base height directly from the canopy height model, this workflow uses a **Vertical Foliage Cover Profile (FCP)** derived from the LiDAR point cloud to identify canopy structural transitions. These transitions are then used to separate overstorey and lower canopy layers prior to crown segmentation.
+Unlike previous ITD methods that estimate crown base height directly from the canopy height model, this workflow uses a **Vertical Foliage Cover Profile (FCP)** derived from the LiDAR point cloud to identify canopy structural transitions. These transitions are then used to separate overstorey and lower canopy layers prior to crown segmentation.
 
 The method is intended for research discussion and algorithm evaluation rather than operational deployment.
 
